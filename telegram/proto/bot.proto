@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package bot;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./botpc";
+
+message Empty {}
+
+message WorkerRole {
+   uint32 id = 1;
+   string role = 2;
+}
+
+message Worker {
+   uint32 id = 1;
+   string login = 2;
+   WorkerRole role = 3;
+}
+
+message Operator {
+   uint32 id = 1;
+   Worker worker = 2;
+   string telegram = 3;
+   int64 telegramId = 4;
+   bool onShift = 5;
+   bool onTimeout = 6;
+}
+
+message OperatorShift {
+   google.protobuf.Timestamp startDate = 1;
+   google.protobuf.Timestamp endDate = 2;
+   uint32 delays = 3;
+}
+
+message OperatorTimeout {
+   google.protobuf.Timestamp startDate = 1;
+   google.protobuf.Timestamp endDate = 2;
+}
+
+message OperatorRequest {
+   string username = 1;
+}
+
+message WriteTelegramIDRequest {
+   string username = 1;
+   int64 telegramId = 2;
+}
+
+message WriteOperatorCaptchaRequest {
+   string username = 1;
+   string captcha = 2;
+}
+
+message TelegramBotKeyResponse {
+   string key = 1;
+}
+  
+message OperatorResponse {
+   Operator operator = 1;
+}
+  
+message OperatorShiftResponse {
+   OperatorShift shift = 1;
+}
+
+message OperatorShiftWithTimeoutsResponse {
+   OperatorShift shift = 1;
+   repeated OperatorTimeout timeouts = 2;
+}
+
+message OperatorTimeoutResponse {
+   OperatorTimeout timeout = 1;
+}
+
+service BotService {
+   rpc WriteOperatorTelegramID (WriteTelegramIDRequest) returns (Empty);
+   rpc WriteOperatorCaptcha (WriteOperatorCaptchaRequest) returns (Empty);
+   rpc ReadTelegramBotKey (Empty) returns (TelegramBotKeyResponse);
+   rpc ReadOperator (OperatorRequest) returns (OperatorResponse);
+   rpc ReadOperatorShift (OperatorRequest) returns (OperatorShiftResponse);
+   rpc ReadOperatorTimeout (OperatorRequest) returns (OperatorTimeoutResponse);
+   rpc StartOperatorShift (OperatorRequest) returns (OperatorShiftResponse);
+   rpc StartOperatorTimeout (OperatorRequest) returns (OperatorTimeoutResponse);
+   rpc StopOperatorShift (OperatorRequest) returns (OperatorShiftWithTimeoutsResponse);
+   rpc StopOperatorTimeout (OperatorRequest) returns (OperatorTimeoutResponse);
+}

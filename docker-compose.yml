@@ -1,0 +1,73 @@
+version: "3"
+
+services: 
+  database: 
+    image: postgres:latest
+    environment: 
+      POSTGRES_DB: "management"
+      POSTGRES_USER: "docker"
+      POSTGRES_PASSWORD: "docker"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      TZ: "Europe/Moscow"
+    volumes:
+       - .:/var/lib/postgresql/data
+    networks:
+      internal:
+        aliases:
+          - database.local
+  backend: 
+    build: "backend"
+    command: "./backend -env prod"
+    environment:
+      BACKEND_DB_PATH: "host=database.local user=docker password=docker dbname=management sslmode=disable"
+      BACKEND_JWT_SECRET: ""
+      BACKEND_REST_PORT: "8081"
+      BACKEND_GRPC_PORT: "5300"
+      TZ: "Europe/Moscow"
+    depends_on: 
+      - database
+    networks:
+      internal:
+        aliases:
+          - backend.local
+  frontend: 
+    build: "frontend"
+    command: ["nginx", "-g", "daemon off;"]
+    volumes:
+      - ./docker/frontend.nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on: 
+      - backend
+    environment: 
+      TZ: "Europe/Moscow"
+    networks:
+      internal:
+        aliases:
+          - frontend.local
+  telegram: 
+    build: "telegram"
+    command: ["node", "index.js", "prod"]
+    environment:
+      TELEGRAM_GRPC_PATH: "backend.local:5300"
+      TELEGRAM_PROTO_PATH: "./proto/bot.proto"
+      TZ: "Europe/Moscow"
+    depends_on: 
+      - backend
+    networks: 
+      - internal
+  nginx: 
+    image: nginx
+    volumes:
+      - ./docker/proxy.nginx.conf:/etc/nginx/nginx.conf:ro
+    command: [nginx-debug, '-g', 'daemon off;']
+    depends_on:
+      - "frontend"
+    environment: 
+      TZ: "Europe/Moscow"
+    ports:
+      - "12001:80"
+    networks:
+      - internal
+networks:
+  internal:
+volumes:
+  database:

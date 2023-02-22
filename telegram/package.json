@@ -1,0 +1,27 @@
+{
+  "name": "management-bot",
+  "version": "1.0.0",
+  "description": "Management TG Bot microservice.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js dev",
+    "prod": "node index.js prod"
+  },
+  "author": "RainStiller",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.5",
+    "axios": "^0.26.1",
+    "config": "^3.3.7",
+    "date-and-time": "^2.3.1",
+    "dotenv": "^16.0.0",
+    "moment": "^2.29.4",
+    "nodemon": "^2.0.15",
+    "sharp": "^0.30.5",
+    "svg-captcha": "^1.4.0",
+    "telegraf": "^4.7.0",
+    "telegraf-i18n": "^6.6.0",
+    "telegraf-throttler": "^0.6.0",
+    "xmldom": "^0.6.0"
+  }
+}
